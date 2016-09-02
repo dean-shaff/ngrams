@@ -27,7 +27,10 @@ class TextProcessor(object):
         elif mode == 'char':
             self.add_files_char(filenames)
         self.mode = mode
-
+        self.n_tokens = len(self.master_tokens)
+        self.n_unique_tokens = len(self.unique_tokens)
+        self.master_tokens_indices = [self.unique_tokens.index(word) for word in self.master_tokens]
+        
     def add_files_word(self,filenames):
         """
         Add the contents of a file to the master source string for word based approach. 
@@ -69,11 +72,15 @@ class TextProcessor(object):
             with codecs.open(filenames, 'r',encoding='utf-8') as src_file:
                     master_str += src_file.read()
         print("Took {:.4f} seconds to generate master string".format(time.time() - t0))
+        t0 = time.time()
         self.master_str += master_str.lower()
-        self.master_tokens.extend(list(master_str))
+        # self.master_str += master_str
+        self.master_tokens.extend(list(self.master_str))
         for rm in self.remove_tokens:
-            self.master_tokens.remove(rm)
+            self.master_tokens = [char for char in self.master_tokens if char != rm]
         self.unique_tokens = list(set(self.master_tokens))
+        self.master_tokens_int = np.array([self.unique_tokens.index(char) for char in self.master_tokens],dtype=int)
+        print("Took {:.4f} seconds to generate master token integer array".format(time.time() - t0))
 
 
 if __name__ == "__main__":
